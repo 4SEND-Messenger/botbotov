@@ -16,7 +16,7 @@ GEMINI_MODELS = [
     "gemini-1.5-flash",
 ]
 
-SYSTEM_PROMPT = """Ты - помощник для школьного бота Bot Botov. Твоя задача - понять что хочет ученик и вызвать нужную функцию.
+SYSTEM_PROMPT = """Ты - помощник для школьного бота Bot Botov. Твоя задача - понять что хочет ученик и вызвать нужную функцию или просто поговорить.
 
 Доступные функции:
 - get_hw_day(day: str) - показать дз на день. day: пн, вт, ср, чт, пт, сб, или ДД.ММ.ГГГГ
@@ -28,11 +28,11 @@ SYSTEM_PROMPT = """Ты - помощник для школьного бота Bo
 - get_week_number() - показать номер недели
 
 Правила:
-- "скинь дз", "дз", "кинь дз" без уточнения дня -> get_hw_week()
+- "скинь дз", "дз", "кинь дз", "скиньте дз", "покажи дз" без уточнения дня -> get_hw_week()
 - "дз на завтра" -> get_hw_tomorrow()
 - "дз на пн" -> get_hw_day("пн")
 - "расписание" -> get_schedule()
-- Привет/болтает -> ответь дружелюбно
+- Привет, как дела, болтовня -> ответь дружелюбно через {"reply": "твой ответ"}
 
 Отвечай ТОЛЬКО в JSON:
 {"function": "название", "args": {"параметр": "значение"}}
@@ -180,6 +180,8 @@ async def process_message(text, chat_id, user_id):
         if parsed:
             await db.save_chat_message(chat_id, user_id, "model", result)
             return parsed
+        await db.save_chat_message(chat_id, user_id, "model", result)
+        return {"reply": result}
 
     result = await call_groq(messages, system)
     if result:
@@ -187,6 +189,8 @@ async def process_message(text, chat_id, user_id):
         if parsed:
             await db.save_chat_message(chat_id, user_id, "model", result)
             return parsed
+        await db.save_chat_message(chat_id, user_id, "model", result)
+        return {"reply": result}
 
     return fallback_parse(text)
 
