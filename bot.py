@@ -895,11 +895,6 @@ async def ai_message_handler(message: Message):
 
     is_reply = message.reply_to_message and message.reply_to_message.from_user and message.reply_to_message.from_user.id == bot.id
     is_mention = message.text and f"@{bot_username}" in message.text
-    is_group = message.chat.type in ("supergroup", "group")
-    hw_request = is_hw_request(text)
-
-    if is_group and not is_reply and not is_mention and not hw_request:
-        return
 
     logger.info(f"AI request from {message.from_user.id} in {message.chat.id}: {text[:50]}")
 
