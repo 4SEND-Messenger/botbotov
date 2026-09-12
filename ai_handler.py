@@ -194,7 +194,7 @@ async def process_message(text, chat_id, user_id):
 def fallback_parse(text):
     text = text.lower().strip()
 
-    if any(w in text for w in ["привет", "здравствуй", "хай", "хелло", "йо", "йоу", "здарова", "салам"]):
+    if any(w in text for w in ["привет", "здравствуй", "хай", "хелло", "йо", "йоу", "здарова", "салам", "дела", "как ты", "че как", "чо как"]):
         return {"reply": "Привет! Я помогу с д/з и расписанием. Спроси что нужно!"}
 
     if any(w in text for w in ["завтра", "на завтра"]):
