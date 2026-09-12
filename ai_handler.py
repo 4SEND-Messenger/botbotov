@@ -173,16 +173,7 @@ async def process_message(text, chat_id, user_id):
     personality = AI_SYSTEM_PROMPT if AI_SYSTEM_PROMPT else SYSTEM_PROMPT
     system = personality + FUNCTION_BLOCK
 
-    await db.save_chat_message(chat_id, user_id, "user", text)
-
-    history = await db.get_chat_history(chat_id, limit=20)
-    messages = []
-    for h in history:
-        role = "user" if h["role"] == "user" else "model"
-        messages.append({"role": role, "content": h["text"]})
-
-    if not messages or messages[-1]["content"] != text:
-        messages.append({"role": "user", "content": text})
+    messages = [{"role": "user", "content": text}]
 
     result = None
 
@@ -190,18 +181,14 @@ async def process_message(text, chat_id, user_id):
     if result:
         parsed = parse_response(result)
         if parsed:
-            await db.save_chat_message(chat_id, user_id, "model", result)
             return parsed
-        await db.save_chat_message(chat_id, user_id, "model", result)
         return {"reply": result}
 
     result = await call_groq(messages, system)
     if result:
         parsed = parse_response(result)
         if parsed:
-            await db.save_chat_message(chat_id, user_id, "model", result)
             return parsed
-        await db.save_chat_message(chat_id, user_id, "model", result)
         return {"reply": result}
 
     return fallback_parse(text)
