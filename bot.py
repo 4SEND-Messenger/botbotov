@@ -996,12 +996,12 @@ async def ai_message_handler(message: Message):
             await message.answer_photo(photo=photo, caption=text_out)
 
     elif func_name == "get_hw_week":
-        week = args.get("week", db.get_school_week(now()))
+        week = args.get("week", db.get_school_week(get_display_datetime()))
         hw_list = await db.get_hw_week(int(week))
         if not hw_list:
             await message.answer(f"Нет д/з за {week} неделю")
         else:
-            title = f"📚 Д/з на неделю ({week})"
+            title = get_week_title(week)
             await send_hw_photo(message, hw_list, title)
 
     elif func_name == "get_schedule":
