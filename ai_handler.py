@@ -224,7 +224,7 @@ def fallback_parse(text):
         if word in text:
             return {"function": "get_hw_day", "args": {"day": code}}
 
-    if any(w in text for w in ["дз", "домашк", "домашн", "задани", "урок"]):
+    if any(w in text for w in ["дз", "домашк", "домашн", "задани", "урок", "скинь", "кинь", "покажи", "дай", "нужно"]):
         return {"function": "get_hw_week", "args": {}}
 
     if "спасибо" in text or "пасиб" in text or "сенкс" in text:
