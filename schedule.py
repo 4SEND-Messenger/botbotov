@@ -4,7 +4,9 @@ SCHOOL_YEAR_START = datetime(2026, 9, 1)
 
 
 def get_school_week(dt):
-    delta = dt.date() - SCHOOL_YEAR_START.date()
+    d = dt.date()
+    first_monday = SCHOOL_YEAR_START.date() - timedelta(days=SCHOOL_YEAR_START.weekday())
+    delta = d - first_monday
     return delta.days // 7 + 1
 
 

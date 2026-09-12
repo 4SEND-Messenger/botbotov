@@ -5,12 +5,15 @@ from config import MONGODB_URI, DB_NAME, now
 client = AsyncIOMotorClient(MONGODB_URI)
 db = client[DB_NAME]
 homework = db["homework"]
+chat_history = db["chat_history"]
 
 SCHOOL_YEAR_START = datetime(2026, 9, 1)
 
 
 def get_school_week(dt):
-    delta = dt.date() - SCHOOL_YEAR_START.date()
+    d = dt.date()
+    first_monday = SCHOOL_YEAR_START.date() - timedelta(days=SCHOOL_YEAR_START.weekday())
+    delta = d - first_monday
     return delta.days // 7 + 1
 
 
@@ -128,3 +131,23 @@ async def mark_reminder_sent(reminder_id: str):
         from bson import ObjectId
         await homework.delete_many({"_id": {"$in": to_delete}})
     return len(to_delete)
+
+
+async def save_chat_message(chat_id, user_id, role, text):
+    doc = {
+        "chat_id": chat_id,
+        "user_id": user_id,
+        "role": role,
+        "text": text,
+        "timestamp": datetime.now()
+    }
+    await chat_history.insert_one(doc)
+
+
+async def get_chat_history(chat_id, limit=20):
+    cursor = chat_history.find(
+        {"chat_id": chat_id}
+    ).sort("timestamp", -1).limit(limit)
+    docs = await cursor.to_list(length=limit)
+    docs.reverse()
+    return docs
