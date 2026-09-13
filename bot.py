@@ -923,7 +923,9 @@ async def ai_message_handler(message: Message):
     if is_group and not is_reply and not is_mention and not hw_request and not is_casual:
         return
 
-    logger.info(f"AI request from {message.from_user.id} in {message.chat.id}: {text[:50]}")
+    user = message.from_user
+    username = f"@{user.username}" if user.username else user.first_name
+    logger.info(f"AI request from {username} (id={user.id}) in {message.chat.id}: {text[:50]}")
 
     import ai_handler
     result = await ai_handler.process_message(text, message.chat.id, message.from_user.id)
