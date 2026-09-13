@@ -21,7 +21,7 @@ async def add_hw(subject: str, date_str: str, task: str, added_by: int):
     dt = datetime.strptime(date_str, "%d.%m.%Y")
     week_number = get_school_week(dt)
     date_dt = datetime.combine(dt.date(), datetime.min.time())
-    filter_doc = {"subject": subject.strip(), "date": date_dt}
+    filter_doc = {"subject": subject.strip().rstrip(":"), "date": date_dt}
     update_doc = {
         "$set": {
             "task": task.strip(),
@@ -67,7 +67,7 @@ async def delete_hw_by_subject(subject: str, week_number: int = None):
     if week_number is None:
         week_number = get_school_week(now())
     result = await homework.delete_many(
-        {"subject": subject, "week_number": week_number}
+        {"subject": subject.strip().rstrip(":"), "week_number": week_number}
     )
     return result.deleted_count
 
