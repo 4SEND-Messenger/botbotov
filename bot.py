@@ -557,6 +557,27 @@ async def cmd_del_hw(message: Message):
         await message.answer(f"✅ Удалено {deleted} записей по предмету '{subject}'")
 
 
+@router.message(Command("send"))
+async def cmd_send(message: Message):
+    if not is_admin(message.from_user.id):
+        return
+
+    args = message.text.split(maxsplit=2)
+
+    if len(args) < 3:
+        await message.answer("Формат: /send ID_группы сообщение\nПример: /send -100123456789 привет всем")
+        return
+
+    chat_id = args[1]
+    text = args[2]
+
+    try:
+        await bot.send_message(chat_id=int(chat_id), text=text)
+        await message.answer(f"✅ Отправлено в {chat_id}")
+    except Exception as e:
+        await message.answer(f"❌ Ошибка: {e}")
+
+
 @router.message(Command("set_admin"))
 async def cmd_set_admin(message: Message):
     if not is_admin(message.from_user.id):
