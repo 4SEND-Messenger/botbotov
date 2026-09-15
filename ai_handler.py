@@ -35,7 +35,8 @@ FUNCTION_BLOCK = """
 - get_hw_week() - дз на всю неделю
 - get_hw_tomorrow() - дз на завтра
 - get_hw_today() - дз на сегодня
-- get_schedule() - расписание
+- get_schedule_day() - расписание на завтра/сегодня
+- get_schedule_week() - расписание на всю неделю
 - get_next() - ближайший учебный день
 - get_week_number() - номер недели
 
@@ -43,7 +44,8 @@ FUNCTION_BLOCK = """
 - "скинь дз", "дз", "кинь дз", "покажи дз", "скиньте дз", "дайте дз", "нужно дз" -> get_hw_week()
 - "дз на завтра" -> get_hw_tomorrow()
 - "дз на пн" -> get_hw_day("пн")
-- "расписание" -> get_schedule()
+- "расписание на неделю", "расписание на эту неделю" -> get_schedule_week()
+- "расписание", "расписание на завтра", "расписание на сегодня" -> get_schedule_day()
 
 Отвечай ТОЛЬКО в JSON:
 {"function": "название", "args": {}}
@@ -206,8 +208,11 @@ def fallback_parse(text):
     if any(w in text for w in ["сегодня", "на сегодня"]):
         return {"function": "get_hw_today", "args": {}}
 
-    if "расписан" in text:
-        return {"function": "get_schedule", "args": {}}
+    if any(w in text for w in ["расписание на неделю", "расписание на эту неделю"]):
+        return {"function": "get_schedule_week", "args": {}}
+
+    if any(w in text for w in ["расписан"]):
+        return {"function": "get_schedule_day", "args": {}}
 
     if any(w in text for w in ["неделя", "номер недели", "какая неделя"]):
         return {"function": "get_week_number", "args": {}}

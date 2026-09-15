@@ -747,6 +747,39 @@ async def cmd_schedule(message: Message):
     await message.answer_photo(photo=photo, caption=text)
 
 
+async def send_schedule_day(message: Message):
+    from ai_handler import get_next_school_day
+    target = get_next_school_day()
+    day_offset = target.weekday()
+    subjects = schedule.WEEK_SCHEDULE.get(day_offset, [])
+
+    if not subjects:
+        await message.answer(f"Нет расписания на {format_date_ru(target)}")
+        return
+
+    day_name = None
+    for d, name in WEEKDAYS.items():
+        if WEEKDAY_ORDER.index(d) == day_offset:
+            day_name = name
+            break
+
+    text = f"📅 {day_name} ({format_date_ru(target)}):\n\n"
+    for i, subj in enumerate(subjects, 1):
+        text += f"  {i}. {subj}\n"
+
+    week_number = db.get_school_week(get_display_datetime())
+    weekdays_labels = [WEEKDAYS[d] for d in WEEKDAY_ORDER]
+    single_schedule = {day_offset: subjects}
+    img = image_gen.generate_schedule_image(single_schedule, week_number, weekdays_labels)
+
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+
+    photo = BufferedInputFile(buf.getvalue(), filename="schedule.png")
+    await message.answer_photo(photo=photo, caption=text)
+
+
 @router.message(Command("adm_help"))
 async def cmd_adm_help(message: Message):
     if not is_admin(message.from_user.id):
@@ -1027,7 +1060,10 @@ async def ai_message_handler(message: Message):
             title = get_week_title(week)
             await send_hw_photo(message, hw_list, title)
 
-    elif func_name == "get_schedule":
+    elif func_name == "get_schedule_day":
+        await send_schedule_day(message)
+
+    elif func_name == "get_schedule_week":
         await cmd_schedule(message)
 
     elif func_name == "get_next":
