@@ -938,7 +938,8 @@ def is_hw_request(text):
         "пн", "вт", "ср", "чт", "пт", "сб",
     ])
     has_pzh = any(w in t for w in ["пж", "пжл", "pls", "плиз"])
-    return has_hw or (has_action and has_day) or (has_action and has_pzh) or (has_hw and has_day)
+    has_schedule = any(w in t for w in ["расписан"])
+    return has_hw or has_schedule or (has_action and has_day) or (has_action and has_pzh) or (has_hw and has_day)
 
 
 @router.message(F.text)
