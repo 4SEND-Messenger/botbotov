@@ -215,6 +215,8 @@ async def send_hw_photo(target, hw_list, title):
 
     hw_by_day = build_hw_by_day(hw_list)
     text = build_hw_text(hw_list, title)
+    if len(text) > 1024:
+        text = text[:1020] + "..."
     img = image_gen.generate_hw_image(hw_by_day, title)
     buf = io.BytesIO()
     img.save(buf, format="PNG")
