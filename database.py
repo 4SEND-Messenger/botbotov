@@ -72,6 +72,15 @@ async def delete_hw_by_subject(subject: str, week_number: int = None):
     return result.deleted_count
 
 
+async def delete_hw_by_date(subject: str, date_str: str):
+    dt = datetime.strptime(date_str, "%d.%m.%Y")
+    date_dt = datetime.combine(dt.date(), datetime.min.time())
+    result = await homework.delete_many(
+        {"subject": subject.strip().rstrip(":"), "date": date_dt}
+    )
+    return result.deleted_count
+
+
 reminders = db["reminders"]
 
 

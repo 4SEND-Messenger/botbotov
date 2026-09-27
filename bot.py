@@ -534,6 +534,11 @@ async def cmd_set_hw(message: Message):
         await message.answer("Неверный формат даты. Используй ДД.ММ.ГГГГ")
         return
 
+    day_offset = datetime.strptime(date_str, "%d.%m.%Y").weekday()
+    day_subjects = schedule.WEEK_SCHEDULE.get(day_offset, [])
+    if subject not in day_subjects:
+        await message.answer(f"⚠️ В расписании на {format_date_ru(datetime.strptime(date_str, '%d.%m.%Y').date())} нет предмета '{subject}'. Дневник: {', '.join(day_subjects)}\n\nТем не менее, добавляю...")
+
     hw_id = await db.add_hw(subject, date_str, task, message.from_user.id)
     await message.answer(f"✅ Д/з добавлено!\n\n{subject} — {date_str}\n{task}")
 
@@ -544,19 +549,34 @@ async def cmd_del_hw(message: Message):
         await message.answer("Только админ может удалять д/з")
         return
 
-    args = message.text.split(maxsplit=1)
+    args = message.text.split(maxsplit=2)
 
     if len(args) < 2:
-        await message.answer("Формат: /del_hw Название предмета\nУдалит все д/з по предмету за эту неделю")
+        await message.answer("Формат: /del_hw Предмет [ДД.ММ.ГГГГ]\nБез даты — удалит всё за неделю\nС датой — точечно")
         return
 
     subject = args[1].strip()
-    deleted = await db.delete_hw_by_subject(subject)
 
+    if len(args) >= 3:
+        date_str = args[2].strip()
+        try:
+            datetime.strptime(date_str, "%d.%m.%Y")
+        except ValueError:
+            await message.answer("Неверный формат даты. Используй ДД.ММ.ГГГГ")
+            return
+        deleted = await db.delete_hw_by_date(subject, date_str)
+        if deleted == 0:
+            await message.answer(f"Не найдено д/з по предмету '{subject}' на {date_str}")
+        else:
+            await message.answer(f"✅ Удалено {deleted} записей по предмету '{subject}' на {date_str}")
+        return
+
+    deleted = await db.delete_hw_by_subject(subject)
     if deleted == 0:
         await message.answer(f"Не найдено д/з по предмету '{subject}' за эту неделю")
     else:
         await message.answer(f"✅ Удалено {deleted} записей по предмету '{subject}'")
+        return
 
 
 @router.message(Command("send"))
